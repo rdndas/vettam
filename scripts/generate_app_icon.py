@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Generates the native macOS squircle AppIcon.icns for Vettam.
-Complies with Apple macOS Human Interface Guidelines (transparent padding
-outside an ~824x824 squircle centered in 1024x1024 canvas), preventing macOS
-from rendering a fallback white backing tile/border around the app icon.
+Preserves 100% interior opacity on the squircle mask (via alpha_composite +
+mask alpha merge) so macOS IconServices never places the icon inside a white
+fallback border, and sharpens the 50x36 template into a crisp high-res emblem.
 """
 import os
 import shutil
 import subprocess
-from PIL import Image
+from PIL import Image, ImageFilter
 
 def generate_icons():
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,32 +23,57 @@ def generate_icons():
     if not os.path.exists(template_path):
         raise FileNotFoundError(f"Missing template: {template_path}")
 
-    # 1. Base 1024x1024 canvas with transparent background
     mask = Image.open(mask_path).convert("L")
-    base = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
-    black_fill = Image.new("RGB", (1024, 1024), (0, 0, 0))
-    base.paste(black_fill, (0, 0), mask)
-
-    # 2. Scale and position white radiant logo
     template = Image.open(template_path).convert("RGBA")
-    logo_h = 480
-    ratio = template.width / template.height
-    logo_w = int(logo_h * ratio)
-    logo_resized = template.resize((logo_w, logo_h), Image.Resampling.LANCZOS)
+    _, _, _, ta = template.split()
 
-    # Recolor alpha template to solid white
-    white_logo = Image.new("RGBA", (logo_w, logo_h), (0, 0, 0, 0))
-    t_pix = logo_resized.load()
-    w_pix = white_logo.load()
+    # 1. Upscale and contour-sharpen the white Vettam emblem
+    logo_h = 420
+    logo_w = int(round(logo_h * (template.width / template.height)))
+    up_smooth = ta.resize((logo_w, logo_h), Image.Resampling.LANCZOS).filter(
+        ImageFilter.GaussianBlur(radius=2.5)
+    )
+
+    sharp_a = Image.new("L", (logo_w, logo_h))
+    s_pix = up_smooth.load()
+    out_pix = sharp_a.load()
     for y in range(logo_h):
         for x in range(logo_w):
-            r, g, b, a = t_pix[x, y]
-            if a > 0:
-                w_pix[x, y] = (255, 255, 255, a)
+            a = s_pix[x, y] / 255.0
+            tail_w = 0.0
+            if y > logo_h * 0.70 and x < logo_w * 0.48:
+                ty = min(1.0, (y - logo_h * 0.70) / (logo_h * 0.12))
+                tx = min(1.0, (logo_w * 0.48 - x) / (logo_w * 0.18))
+                tail_w = ty * tx
+            t_crisp = max(0.0, min(1.0, (a - 0.38) / 0.14))
+            crisp = t_crisp * t_crisp * (3.0 - 2.0 * t_crisp)
+            t_tail = max(0.0, min(1.0, (a - 0.06) / 0.50))
+            soft = (t_tail * t_tail * (3.0 - 2.0 * t_tail)) * min(1.0, a * 1.4)
+            val = crisp * (1.0 - tail_w) + soft * tail_w
+            out_pix[x, y] = int(round(max(0.0, min(1.0, val)) * 255))
 
-    pos_x = (1024 - logo_w) // 2
-    pos_y = (1024 - logo_h) // 2 - 6 # optically centered vertically in squircle
-    base.paste(white_logo, (pos_x, pos_y), white_logo)
+    # 2. Composite glowing white emblem over full-black canvas
+    base = Image.new("RGBA", (1024, 1024), (0, 0, 0, 255))
+    glow_a = sharp_a.filter(ImageFilter.GaussianBlur(radius=18.0)).point(
+        lambda p: int(p * 0.16)
+    )
+    glow_layer = Image.new("RGBA", (logo_w, logo_h), (255, 255, 255, 0))
+    glow_layer.putalpha(glow_a)
+
+    white_logo = Image.new("RGBA", (logo_w, logo_h), (255, 255, 255, 0))
+    white_logo.putalpha(sharp_a)
+
+    pos_x = (1024 - logo_w) // 2 + 6
+    pos_y = (1024 - logo_h) // 2 - 4
+
+    overlay = Image.new("RGBA", (1024, 1024), (0, 0, 0, 0))
+    overlay.alpha_composite(glow_layer, (pos_x, pos_y))
+    overlay.alpha_composite(white_logo, (pos_x, pos_y))
+    base = Image.alpha_composite(base, overlay)
+
+    # Apply exact squircle alpha mask without interior holes
+    r, g, b, _ = base.split()
+    final_img = Image.merge("RGBA", (r, g, b, mask))
 
     # 3. Create iconset directory and sizes
     os.makedirs(iconset_dir, exist_ok=True)
@@ -66,7 +91,7 @@ def generate_icons():
     ]
 
     for size, filename in icon_sizes:
-        resized = base.resize((size, size), Image.Resampling.LANCZOS)
+        resized = final_img.resize((size, size), Image.Resampling.LANCZOS)
         resized.save(os.path.join(iconset_dir, filename))
 
     # 4. Compile to .icns using macOS iconutil
