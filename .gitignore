@@ -1,4 +1,5 @@
 .DS_Store
 .modcache
 build
+dist
 Vettam.app

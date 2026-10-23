@@ -5,6 +5,7 @@ echo "Building Vettam.app..."
 
 mkdir -p Vettam.app/Contents/MacOS Vettam.app/Contents/Resources .modcache
 cp resources/*.png resources/*.icns Vettam.app/Contents/Resources/ 2>/dev/null || true
+cp resources/Info.plist Vettam.app/Contents/Info.plist
 
 swiftc -O -module-cache-path .modcache \
   -framework SwiftUI \
