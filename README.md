@@ -1,14 +1,16 @@
-# വെട്ടം (Vettam)
+# Vettam
 
 A lightweight, native macOS menu bar app written in Swift to control external displays (specifically tuned for the MSI Modern MD271UL on Apple Silicon) with **zero window overlays**.
+
+*Named after the Malayalam word for light (വെട്ടം).*
 
 ---
 
 ## Features
 
 - **Icon & Identity:**
-  - Status bar icon is rendered as a vector template of the Malayalam letter **വെ** (*Ve* for *Vettam* / Light), seamlessly inverting between Dark and Light Mode.
-  - Named **വെട്ടം (Vettam)**.
+  - Status bar icon is rendered as a clean vector template, seamlessly inverting between Dark and Light Mode.
+  - Pure English UI and system integration.
 - **Hybrid Display Engine:**
   - **Zero-Overlay GPU Gamma Control:** Works immediately over HDMI via macOS GPU lookup tables (`CGSetDisplayTransferByTable`).
   - **Direct Hardware DDC/CI Control:** Automatically activates when connected via USB-C (DP Alt Mode) or DisplayPort, with scaler bus pacing (50ms) and EEPROM write coalescing (120ms debounce).
@@ -31,5 +33,3 @@ A lightweight, native macOS menu bar app written in Swift to control external di
 ```bash
 open Vettam.app
 ```
-
-Look for the **വെ** icon in your macOS top menu bar!

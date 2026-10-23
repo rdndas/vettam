@@ -47,6 +47,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 // Bootstrap Application
+ProcessInfo.processInfo.processName = "Vettam"
 let app = NSApplication.shared
 let delegate = AppDelegate()
 app.delegate = delegate
