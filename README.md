@@ -67,15 +67,29 @@ Most third-party monitor dimmer apps solve the HDMI limitation by creating **sem
    - **`Vettam-1.0.0.zip`**: Standalone archive for portable use.
 2. Launch **Vettam** from Launchpad or Spotlight (`⌘ + Space` $\rightarrow$ `Vettam`). Look for the icon in your top menu bar!
 
-> [!NOTE]
-> **First Launch on macOS (Gatekeeper):**
-> Because Vettam is an independent open-source tool built outside the Mac App Store, macOS Gatekeeper may prompt you on first launch. If prompted:
-> - Right-click (or Control-click) `Vettam.app` in `/Applications` and select **Open**, then click **Open** in the dialog.
-> - Alternatively, go to **System Settings $\rightarrow$ Privacy & Security**, scroll down, and click **Open Anyway**.
+> [!IMPORTANT]
+> **First Launch on macOS (Gatekeeper / "Cannot be opened"):**
+> Because Vettam is an independent open-source app and is not signed with a paid Apple Developer certificate, macOS Gatekeeper will block it on first launch with a message saying *"Apple could not verify Vettam.app is free of malware"*.
+>
+> To open the app, use either of these quick solutions:
+> 1. **Terminal (Instant):** Run this command to clear the quarantine flag:
+>    ```bash
+>    xattr -cr /Applications/Vettam.app
+>    ```
+> 2. **System Settings:** Go to **System Settings $\rightarrow$ Privacy & Security**, scroll down to the **Security** section, and click **Open Anyway** next to the Vettam notice.
 
 ---
 
-### Option 2: Build from Source
+### Option 2: Install via Homebrew
+
+```bash
+brew tap rdndas/vettam https://github.com/rdndas/vettam
+brew install --cask vettam
+```
+
+---
+
+### Option 3: Build from Source
 
 Requirements: macOS 12+ and Swift compiler (`swiftc` via Command Line Tools or Xcode).
 
