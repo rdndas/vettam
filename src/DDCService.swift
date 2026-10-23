@@ -97,7 +97,8 @@ public final class DDCService {
         // Enforce clamping 0...100
         let clamped = min(max(value, 0), 100)
 
-        ddcQueue.async {
+        ddcQueue.async { [weak self] in
+            guard let self = self else { return }
             self.pendingWrites[vcp.rawValue] = clamped
 
             // Cancel any prior scheduled commit
