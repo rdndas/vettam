@@ -1,11 +1,13 @@
 cask "vettam" do
   version "1.0.0"
-  sha256 "487cceb28576feb188500165ca6f15d85a45264b21d2a16dd09dc87ff3b402b7"
+  sha256 "a421663d033b0e5f447960d578d3c722827406e5d6e04d3df3ebad78c0fbd950"
 
   url "https://github.com/rdndas/vettam/releases/download/v#{version}/Vettam-#{version}.dmg"
   name "Vettam"
   desc "Lightweight, zero-overlay macOS menu bar monitor controller"
   homepage "https://github.com/rdndas/vettam"
+
+  depends_on macos: ">= 26.0"
 
   app "Vettam.app"
 

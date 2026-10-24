@@ -91,7 +91,7 @@ brew install --cask vettam
 
 ### Option 3: Build from Source
 
-Requirements: macOS 12+ and Swift compiler (`swiftc` via Command Line Tools or Xcode).
+Requirements: macOS 26+ and Swift compiler (`swiftc` via Command Line Tools or Xcode).
 
 ```bash
 git clone https://github.com/rdndas/vettam.git
