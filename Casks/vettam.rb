@@ -7,7 +7,7 @@ cask "vettam" do
   desc "Lightweight, zero-overlay macOS menu bar monitor controller"
   homepage "https://github.com/rdndas/vettam"
 
-  depends_on macos: ">= 26.0"
+  depends_on macos: :tahoe
 
   app "Vettam.app"
 
